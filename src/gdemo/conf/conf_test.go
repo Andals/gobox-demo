@@ -19,7 +19,7 @@ func init() {
 }
 
 func TestPrjHome(t *testing.T) {
-	got := PrjHome
+	got := ServerConf.PrjHome
 	expect := prjHomeTest
 
 	if got != expect {
@@ -28,7 +28,7 @@ func TestPrjHome(t *testing.T) {
 }
 
 func TestHostname(t *testing.T) {
-	got := Hostname
+	got := ServerConf.Hostname
 	expect, _ := os.Hostname()
 
 	if got != expect {
@@ -37,7 +37,7 @@ func TestHostname(t *testing.T) {
 }
 
 func TestUsername(t *testing.T) {
-	got := Username
+	got := ServerConf.Username
 	curUser, _ := user.Current()
 	expect := curUser.Username
 
@@ -90,17 +90,25 @@ func TestIsDev(t *testing.T) {
 	}
 }
 
-func TestFrontGoHttpPort(t *testing.T) {
-	got := ServerConf.FrontGoHttpPort
+func TestApiGoHttpHost(t *testing.T) {
+	got := ServerConf.ApiGoHttpHost
 
-	if got == "" {
-		t.Errorf("got FrontGoHttpPort empty")
+	if got != "127.0.0.1" {
+		t.Errorf("got ApiGoHttpHost error")
 	}
 }
 
-func TestFrontPidFile(t *testing.T) {
-	got := ServerConf.FrontPidFile
-	expect := prjHomeTest + "/tmp/front.pid"
+func TestApiGoHttpPort(t *testing.T) {
+	got := ServerConf.ApiGoHttpPort
+
+	if got == "" {
+		t.Errorf("got ApiGoHttpPort empty")
+	}
+}
+
+func TestApiPidFile(t *testing.T) {
+	got := ServerConf.ApiPidFile
+	expect := prjHomeTest + "/tmp/api.pid"
 
 	if got != expect {
 		t.Errorf("got [%s] expected [%s]", got, expect)

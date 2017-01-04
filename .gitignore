@@ -13,4 +13,4 @@ conf/http/*_http.conf*
 
 src/vendor
 
-src/main/front/front
+src/main/api/api

@@ -1,13 +1,13 @@
-package front
+package api
 
 import (
 	"andals/gobox/http/controller"
 
-	"family/controller/front/athena"
-	"family/controller/front/base"
+	"gdemo/controller/api/base"
+	"gdemo/controller/api/index"
 )
 
 func RegAction(cl *controller.Controller) {
 	base.RegAction(cl)
-	athena.RegAction(cl)
+	index.RegAction(cl)
 }

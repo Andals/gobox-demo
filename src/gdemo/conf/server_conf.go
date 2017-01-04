@@ -3,6 +3,8 @@ package conf
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
+	"os/user"
 
 	"andals/gobox/exception"
 	"andals/gobox/misc"
@@ -13,20 +15,30 @@ import (
 var ServerConf serverConf
 
 type serverConf struct {
+	PrjHome  string
+	Hostname string
+	Username string
+
 	PrjName string
 	IsDev   bool
 
-	FrontDomain     string
-	FrontGoHttpPort string
+	ApiDomain     string
+	ApiGoHttpHost string
+	ApiGoHttpPort string
 
 	DataRoot string
 	LogRoot  string
 	TmpRoot  string
 
-	FrontPidFile string
+	ApiPidFile string
 }
 
-func initServerConf(confRoot string) *exception.Exception {
+func initServerConf(prjHome string) *exception.Exception {
+	if !misc.DirExist(prjHome) {
+		return exception.New(errno.E_CONF_INVALID_PRJ_HOME, "prjHome not exists")
+	}
+
+	confRoot := prjHome + "/conf"
 	scJson := new(serverConfJson)
 
 	err := parseServerConfJson(confRoot+"/server/server_conf.json", scJson)
@@ -38,17 +50,23 @@ func initServerConf(confRoot string) *exception.Exception {
 		return err
 	}
 
+	ServerConf.PrjHome = prjHome
+	ServerConf.Hostname, _ = os.Hostname()
+	curUser, _ := user.Current()
+	ServerConf.Username = curUser.Username
+
 	ServerConf.PrjName = scJson.PrjName
 	ServerConf.IsDev = scJson.IsDev
 
-	ServerConf.FrontDomain = scJson.FrontDomain
-	ServerConf.FrontGoHttpPort = scJson.FrontGoHttpPort
+	ServerConf.ApiDomain = scJson.ApiDomain
+	ServerConf.ApiGoHttpHost = scJson.ApiGoHttpHost
+	ServerConf.ApiGoHttpPort = scJson.ApiGoHttpPort
 
-	ServerConf.DataRoot = PrjHome + "/data"
-	ServerConf.LogRoot = PrjHome + "/logs"
-	ServerConf.TmpRoot = PrjHome + "/tmp"
+	ServerConf.DataRoot = ServerConf.PrjHome + "/data"
+	ServerConf.LogRoot = ServerConf.PrjHome + "/logs"
+	ServerConf.TmpRoot = ServerConf.PrjHome + "/tmp"
 
-	ServerConf.FrontPidFile = ServerConf.TmpRoot + "/front.pid"
+	ServerConf.ApiPidFile = ServerConf.TmpRoot + "/api.pid"
 
 	return nil
 }
@@ -57,8 +75,9 @@ type serverConfJson struct {
 	PrjName string `json:"prj_name"`
 	IsDev   bool   `json:"is_dev"`
 
-	FrontDomain     string `json:"front_domain"`
-	FrontGoHttpPort string `json:"front_gohttp_port"`
+	ApiDomain     string `json:"api_domain"`
+	ApiGoHttpHost string `json:"api_gohttp_host"`
+	ApiGoHttpPort string `json:"api_gohttp_port"`
 }
 
 func parseServerConfJson(path string, scJson *serverConfJson) *exception.Exception {

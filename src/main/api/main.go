@@ -6,6 +6,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"strconv"
 	"strings"
 
 	"andals/gobox/http/controller"
@@ -13,11 +14,9 @@ import (
 	"andals/gobox/pidfile"
 
 	"gdemo/conf"
-	"gdemo/controller/front"
+	"gdemo/controller/api"
 	"gdemo/errno"
-	"gdemo/gvalue"
-
-	"andals/gobox/ipquery"
+	"gdemo/log"
 )
 
 func main() {
@@ -39,7 +38,7 @@ func main() {
 		os.Exit(e.Errno())
 	}
 
-	e = log.Init(conf.ServerConf.LogRoot())
+	e = log.Init(conf.ServerConf.LogRoot)
 	if e != nil {
 		fmt.Println(e.Error())
 		os.Exit(e.Errno())
@@ -48,21 +47,9 @@ func main() {
 		log.Free()
 	}()
 
-	e = gvalue.Init()
-	if e != nil {
-		fmt.Println(e.Error())
-		os.Exit(e.Errno())
-	}
-
-	err := ipquery.Load(conf.ServerConf.IpDataFile)
+	pf, err := pidfile.CreatePidFile(conf.ServerConf.ApiPidFile)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(errno.E_SYS_LOAD_IPQUERY_DATA_FAIL)
-	}
-
-	pf, err := pidfile.CreatePidFile(conf.ServerConf.FrontPidFile())
-	if err != nil {
-		fmt.Printf("create pid file %s failed, error: %s\n", conf.ServerConf.FrontPidFile(), err.Error())
+		fmt.Printf("create pid file %s failed, error: %s\n", conf.ServerConf.ApiPidFile, err.Error())
 		os.Exit(errno.E_SYS_SAVE_PID_FILE_FAIL)
 	}
 
@@ -73,14 +60,14 @@ func main() {
 	}
 
 	cl := controller.NewController()
-	front.RegAction(cl)
+	api.RegAction(cl)
 
-	err = gracehttp.ListenAndServe(conf.ServerConf.FrontGolangHost+":"+conf.ServerConf.FrontGolangPort, cl)
+	err = gracehttp.ListenAndServe(conf.ServerConf.ApiGoHttpHost+":"+conf.ServerConf.ApiGoHttpPort, cl)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("pid:" + strconv.Itoa(os.Getpid()) + ", err:" + err.Error())
 	}
 
 	if err := pidfile.ClearPidFile(pf); err != nil {
-		fmt.Printf("clear pid file %s failed, error: %s\n", pf.Path, err.Error())
+		fmt.Printf("clear pid file failed, error: %s\n", err.Error())
 	}
 }

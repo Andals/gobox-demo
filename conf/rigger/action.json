@@ -13,6 +13,6 @@
     ],
     "exec": [
         "${NGX_EXEC_PREFIX} -s reload",
-        "${PRJ_HOME}/project/gdemo/front.sh"
+        "${PRJ_HOME}/project/gdemo/api.sh"
     ]
 }

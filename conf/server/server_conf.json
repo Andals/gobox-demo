@@ -1,4 +1,5 @@
 {
     "prj_name": "gdemo",
-    "is_dev": false
+    "is_dev": false,
+    "api_gohttp_host": "127.0.0.1"
 }

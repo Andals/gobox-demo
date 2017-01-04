@@ -24,12 +24,12 @@
         "default": "sudo /usr/local/nginx/sbin/nginx"
     },
 
-    "FRONT_DOMAIN": "${USER}.gdemo.com",
-    "FRONT_GOHTTP_PORT": "__MATH__(6000+${UID})",
+    "API_DOMAIN": "${USER}.gdemo.com",
+    "API_GOHTTP_PORT": "__MATH__(6000+${UID})",
 
-    "FRONT_HTTP_ACCESS_LOG": "${FRONT_DOMAIN}.log",
-    "FRONT_HTTP_ERROR_LOG": "${FRONT_DOMAIN}.log.err",
-    "FRONT_HTTP_CONF_TPL": "${RIGGER_TPL_ROOT}/tpl_front_http.conf.ngx",
-    "FRONT_HTTP_CONF_DST": "${PRJ_HOME}/conf/http/${USER}_front_http.conf.ngx",
-    "FRONT_HTTP_CONF_LN": "${NGX_DATA_ROOT}/conf/include/${FRONT_DOMAIN}.conf"
+    "API_HTTP_ACCESS_LOG": "${API_DOMAIN}.log",
+    "API_HTTP_ERROR_LOG": "${API_DOMAIN}.log.err",
+    "API_HTTP_CONF_TPL": "${RIGGER_TPL_ROOT}/tpl_api_http.conf.ngx",
+    "API_HTTP_CONF_DST": "${PRJ_HOME}/conf/http/${USER}_api_http.conf.ngx",
+    "API_HTTP_CONF_LN": "${NGX_DATA_ROOT}/conf/include/${API_DOMAIN}.conf"
 }
