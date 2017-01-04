@@ -1,0 +1,16 @@
+*.sw*
+
+tmp
+tags
+data
+logs
+bin
+pkg
+
+conf/server/*_server_conf_rewrite.json
+conf/server_conf_rewrite.json
+conf/http/*_http.conf*
+
+src/vendor
+
+src/main/front/front

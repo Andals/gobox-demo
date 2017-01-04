@@ -1,0 +1,5 @@
+{
+    "is_dev": true,
+    "front_domain": "${FRONT_DOMAIN}",
+    "front_gohttp_port": "${FRONT_GOHTTP_PORT}"
+}

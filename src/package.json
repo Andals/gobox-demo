@@ -1,0 +1,6 @@
+{
+    "name": "hao360cn_family",
+    "dependencies": {
+        "andals/gobox": "git+https://github.com/Andals/gobox.git"
+    }
+}

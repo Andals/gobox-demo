@@ -1,0 +1,21 @@
+server {
+    listen ${NGX_HTTP_PORT};
+    server_name ${FRONT_DOMAIN};
+    server_tokens on;
+
+    keepalive_timeout 5;
+    lua_code_cache off;
+
+    charset utf-8;
+
+    include ${PRJ_HOME}/conf/http/general/gzip.conf;
+
+    access_log logs/${FRONT_HTTP_ACCESS_LOG} combinedio buffer=${NGX_ACCESS_LOG_BUFFER}k;
+    error_log  logs/${FRONT_HTTP_ERROR_LOG};
+
+    location / {
+        proxy_intercept_errors on;
+        include ${PRJ_HOME}/conf/http/general/http_proxy.conf;
+        proxy_pass http://127.0.0.1:${FRONT_GOHTTP_PORT}$request_uri;
+    }
+}
