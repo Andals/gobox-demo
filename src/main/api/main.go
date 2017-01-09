@@ -14,7 +14,7 @@ import (
 	"andals/gobox/pidfile"
 
 	"gdemo/conf"
-	"gdemo/controller/api"
+	"gdemo/controller/api/index"
 	"gdemo/errno"
 	"gdemo/log"
 )
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	cl := controller.NewController()
-	api.RegAction(cl)
+	index.RegAction(cl)
 
 	err = gracehttp.ListenAndServe(conf.ServerConf.ApiGoHttpHost+":"+conf.ServerConf.ApiGoHttpPort, cl)
 	if err != nil {
