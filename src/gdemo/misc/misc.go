@@ -8,10 +8,6 @@ import (
 	"gdemo/errno"
 )
 
-const (
-	TRANS_DATA_KEY_USER_LOG = "user_log"
-)
-
 type ApiData struct {
 	Errno int `json:"errno"`
 
@@ -20,17 +16,14 @@ type ApiData struct {
 }
 
 func ApiJson(data interface{}, e *exception.Exception) []byte {
-	en := errno.SUCCESS
-	msg := ""
-	if e != nil {
-		en = e.Errno()
-		msg = e.Msg()
-	}
-
 	result := &ApiData{
-		Errno: en,
-		Msg:   msg,
+		Errno: errno.SUCCESS,
+		Msg:   "",
 		Data:  data,
+	}
+	if e != nil {
+		result.Errno = e.Errno()
+		result.Msg = e.Msg()
 	}
 
 	aj, err := json.Marshal(result)

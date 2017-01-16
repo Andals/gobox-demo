@@ -9,12 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"andals/gobox/http/controller"
 	"andals/gobox/http/gracehttp"
+	"andals/gobox/http/system"
 	"andals/gobox/pidfile"
 
+	"andals/gobox/http/router"
 	"gdemo/conf"
-	"gdemo/controller/api/index"
+	"gdemo/controller/api"
 	"gdemo/errno"
 	"gdemo/log"
 )
@@ -59,10 +60,12 @@ func main() {
 		}()
 	}
 
-	cl := controller.NewController()
-	index.RegAction(cl)
+	r := router.NewSimpleRouter()
+	r.MapRouteItems(new(api.IndexController))
 
-	err = gracehttp.ListenAndServe(conf.ServerConf.ApiGoHttpHost+":"+conf.ServerConf.ApiGoHttpPort, cl)
+	sys := system.NewSystem(r)
+
+	err = gracehttp.ListenAndServe(conf.ServerConf.ApiGoHttpHost+":"+conf.ServerConf.ApiGoHttpPort, sys)
 	if err != nil {
 		fmt.Println("pid:" + strconv.Itoa(os.Getpid()) + ", err:" + err.Error())
 	}
