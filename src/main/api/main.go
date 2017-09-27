@@ -1,6 +1,16 @@
 package main
 
 import (
+	"andals/gobox/http/gracehttp"
+	"andals/gobox/http/router"
+	"andals/gobox/http/system"
+	"andals/gobox/pidfile"
+
+	"gdemo/conf"
+	"gdemo/controller/api/demo"
+	"gdemo/errno"
+	"gdemo/gvalue"
+
 	"flag"
 	"fmt"
 	"net/http"
@@ -8,16 +18,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"andals/gobox/http/gracehttp"
-	"andals/gobox/http/system"
-	"andals/gobox/pidfile"
-
-	"andals/gobox/http/router"
-	"gdemo/conf"
-	"gdemo/controller/api"
-	"gdemo/errno"
-	"gdemo/log"
 )
 
 func main() {
@@ -30,7 +30,7 @@ func main() {
 	if prjHome == "" {
 		fmt.Println("missing flag prjHome: ")
 		flag.PrintDefaults()
-		os.Exit(errno.E_SYS_INVALID_FLAG_PRJ_HOME)
+		os.Exit(errno.E_SYS_INVALID_PRJ_HOME)
 	}
 
 	e := conf.Init(prjHome)
@@ -39,33 +39,38 @@ func main() {
 		os.Exit(e.Errno())
 	}
 
-	e = log.Init(conf.ServerConf.LogRoot)
+	if conf.PprofConf.Enable {
+		go func() {
+			http.ListenAndServe("127.0.0.1:"+conf.PprofConf.Port, nil)
+		}()
+	}
+
+	e = gvalue.InitLog("api")
 	if e != nil {
 		fmt.Println(e.Error())
 		os.Exit(e.Errno())
 	}
 	defer func() {
-		log.Free()
+		gvalue.FreeLog()
 	}()
 
-	pf, err := pidfile.CreatePidFile(conf.ServerConf.ApiPidFile)
+	gvalue.InitMysql()
+	gvalue.InitRedis()
+
+	pf, err := pidfile.CreatePidFile(conf.BaseConf.ApiPidFile)
 	if err != nil {
-		fmt.Printf("create pid file %s failed, error: %s\n", conf.ServerConf.ApiPidFile, err.Error())
+		fmt.Printf("create pid file %s failed, error: %s\n", conf.BaseConf.ApiPidFile, err.Error())
 		os.Exit(errno.E_SYS_SAVE_PID_FILE_FAIL)
 	}
 
-	if conf.ServerConf.IsDev {
-		go func() {
-			http.ListenAndServe(":6060", nil)
-		}()
-	}
-
 	r := router.NewSimpleRouter()
-	r.MapRouteItems(new(api.IndexController))
+	r.MapRouteItems(
+		new(demo.DemoController),
+	)
 
 	sys := system.NewSystem(r)
 
-	err = gracehttp.ListenAndServe(conf.ServerConf.ApiGoHttpHost+":"+conf.ServerConf.ApiGoHttpPort, sys)
+	err = gracehttp.ListenAndServe(conf.ApiHttpConf.GoHttpHost+":"+conf.ApiHttpConf.GoHttpPort, sys)
 	if err != nil {
 		fmt.Println("pid:" + strconv.Itoa(os.Getpid()) + ", err:" + err.Error())
 	}

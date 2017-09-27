@@ -1,25 +1,34 @@
 package misc
 
 import (
-	"encoding/json"
+	"gdemo/errno"
 
 	"andals/gobox/exception"
+	gmisc "andals/gobox/misc"
 
-	"gdemo/errno"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"net/smtp"
+	"reflect"
+	"strings"
 )
 
 type ApiData struct {
-	Errno int `json:"errno"`
+	Errno int    `json:"errno"`
+	Msg   string `json:"msg"`
+	V     string `json:"v"`
 
-	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
 }
 
-func ApiJson(data interface{}, e *exception.Exception) []byte {
+func ApiJson(v string, data interface{}, e *exception.Exception) []byte {
 	result := &ApiData{
 		Errno: errno.SUCCESS,
 		Msg:   "",
-		Data:  data,
+		V:     v,
+
+		Data: data,
 	}
 	if e != nil {
 		result.Errno = e.Errno()
@@ -36,4 +45,81 @@ func ApiJson(data interface{}, e *exception.Exception) []byte {
 	}
 
 	return aj
+}
+
+func ApiJsonp(v string, data interface{}, e *exception.Exception, callback string) []byte {
+	return gmisc.AppendBytes(
+		[]byte(" "),
+		[]byte(callback),
+		[]byte("("),
+		[]byte(ApiJson(v, data, e)),
+		[]byte(");"),
+	)
+}
+
+func SendMail(subject, body, from string, to []string) error {
+	auth := smtp.PlainAuth("", "", "", "")
+	toStr := strings.Join(to, "\t")
+	msg := []byte("To:" + toStr + "\r\n" + "Subject:" + subject + "\r\n\r\n" + body + "\r\n")
+
+	err := smtp.SendMail("127.0.0.1:25", auth, from, to, msg)
+	return err
+}
+
+func ParseJsonFile(filePath string, v interface{}) error {
+	if !gmisc.FileExist(filePath) {
+		return errors.New("confFile " + filePath + " not exists")
+	}
+
+	jsonBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	return json.Unmarshal(jsonBytes, v)
+}
+
+func SaveJsonFile(filePath string, v interface{}) error {
+	jsonBytes, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(filePath, jsonBytes, 0644)
+}
+
+var StructSimpleFields map[reflect.Kind]bool = map[reflect.Kind]bool{
+	reflect.Bool:    true,
+	reflect.Int:     true,
+	reflect.Int8:    true,
+	reflect.Int16:   true,
+	reflect.Int32:   true,
+	reflect.Int64:   true,
+	reflect.Uint:    true,
+	reflect.Uint8:   true,
+	reflect.Uint16:  true,
+	reflect.Uint64:  true,
+	reflect.Float32: true,
+	reflect.Float64: true,
+	reflect.String:  true,
+}
+
+func StructSimpleFieldAssign(sou, dst interface{}) {
+	rsoue := reflect.ValueOf(sou).Elem()
+	rsout := rsoue.Type()
+	rdste := reflect.ValueOf(dst).Elem()
+
+	for i := 0; i < rsoue.NumField(); i++ {
+		rsoutf := rsout.Field(i)
+		rdstv := rdste.FieldByName(rsoutf.Name)
+		if !rdstv.IsValid() {
+			continue
+		}
+
+		rsouv := rsoue.Field(i)
+		rsouk := rsouv.Kind()
+		if _, ok := StructSimpleFields[rsouk]; ok && rsouv.Type().Name() == rdstv.Type().Name() {
+			rdstv.Set(rsouv)
+		}
+	}
 }

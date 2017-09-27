@@ -1,15 +1,18 @@
 package controller
 
 import (
+	"gdemo/gvalue"
+
+	"andals/gobox/encoding"
+	"andals/gobox/http/controller"
+	gmisc "andals/gobox/misc"
+	"andals/golog"
+
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"time"
-
-	"andals/gobox/encoding"
-	"andals/gobox/http/controller"
-	gmisc "andals/gobox/misc"
 )
 
 const (
@@ -24,12 +27,15 @@ type BaseContext struct {
 	RespWriter http.ResponseWriter
 	RespBody   []byte
 
-	QueryValues    *url.Values
+	QueryValues    url.Values
 	RemoteRealAddr struct {
 		Ip   string
 		Port string
 	}
 	Rid []byte
+
+	LogFormater golog.IFormater
+	ErrorLogger golog.ILogger
 }
 
 func (this *BaseContext) Request() *http.Request {
@@ -54,7 +60,7 @@ func (this *BaseController) NewActionContext(req *http.Request, respWriter http.
 	}
 
 	req.ParseForm()
-	context.QueryValues = &req.Form
+	context.QueryValues = req.Form
 
 	context.RemoteRealAddr.Ip, context.RemoteRealAddr.Port = this.parseRemoteAddr(req)
 
@@ -64,6 +70,10 @@ func (this *BaseController) NewActionContext(req *http.Request, respWriter http.
 
 	ridStr := context.RemoteRealAddr.Ip + ":" + context.RemoteRealAddr.Port + "," + strconv.FormatInt(timeInt, 10) + "," + strconv.FormatInt(randInt, 10)
 	context.Rid = encoding.Base64Encode([]byte(ridStr))
+
+	context.LogFormater = golog.NewWebFormater(context.Rid, []byte(context.RemoteRealAddr.Ip))
+	context.RespWriter.Header().Add("X-Powered-By", "gohttp")
+	context.ErrorLogger = gvalue.NewAsyncLogger(gvalue.ErrorLogWriter, context.LogFormater)
 
 	return context
 }
@@ -75,6 +85,14 @@ func (this *BaseController) AfterAction(context controller.ActionContext) {
 }
 
 func (this *BaseController) Destruct(context controller.ActionContext) {
+	bcontext := context.(*BaseContext)
+
+	bcontext.RespBody = nil
+	bcontext.QueryValues = nil
+	bcontext.Rid = nil
+
+	bcontext.ErrorLogger.Free()
+	bcontext.LogFormater = nil
 }
 
 func (this *BaseController) parseRemoteAddr(req *http.Request) (string, string) {
