@@ -2,8 +2,6 @@
     "is_dev": true,
     "idc": "dev",
 
-    "gohttp_port": "9001",
-
     "log": {
         "level": 1
     },
