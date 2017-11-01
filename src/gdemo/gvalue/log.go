@@ -12,6 +12,8 @@ var ErrorLogWriter golog.IWriter
 var RedisLogWriter golog.IWriter
 var MysqlLogWriter golog.IWriter
 
+var NoopLogger golog.ILogger = new(golog.NoopLogger)
+
 func InitLog(systemName string) *exception.Exception {
 	golog.InitBufferAutoFlushRoutine(conf.LogConf.MaxBufferNum, conf.LogConf.BufferAutoFlushTimeInterval)
 	golog.InitAsyncLogRoutine(conf.LogConf.MaxAsyncMsgNum)

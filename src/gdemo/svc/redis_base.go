@@ -34,6 +34,7 @@ func (this *redisBaseSvc) saveJsonDataToRedis(key string, v interface{}, expireS
 
 	_, err = this.rclient.Do("set", key, string(jsonBytes), "ex", expireSeconds)
 	if err != nil {
+		this.rclient.Free()
 		this.elogger.Warning([]byte("set " + key + " to redis error: " + err.Error()))
 		return err
 	}
@@ -44,6 +45,7 @@ func (this *redisBaseSvc) saveJsonDataToRedis(key string, v interface{}, expireS
 func (this *redisBaseSvc) getJsonDataFromRedis(key string, v interface{}) (bool, error) {
 	reply, err := this.rclient.Do("get", key)
 	if err != nil {
+		this.rclient.Free()
 		this.elogger.Warning([]byte("get " + key + " from redis error: " + err.Error()))
 		return false, err
 	}
@@ -81,6 +83,7 @@ func (this *redisBaseSvc) saveHashEntityToRedis(key string, entityPtr interface{
 	}
 	_, err := this.rclient.ExecPipelining()
 	if err != nil {
+		this.rclient.Free()
 		this.elogger.Warning([]byte("hmset " + key + " to redis error: " + err.Error()))
 		return err
 	}
@@ -91,6 +94,7 @@ func (this *redisBaseSvc) saveHashEntityToRedis(key string, entityPtr interface{
 func (this *redisBaseSvc) getHashEntityFromRedis(key string, entityPtr interface{}) (bool, error) {
 	reply, err := this.rclient.Do("hgetall", key)
 	if err != nil {
+		this.rclient.Free()
 		this.elogger.Warning([]byte("hgetall " + key + " from redis error: " + err.Error()))
 		return false, err
 	}

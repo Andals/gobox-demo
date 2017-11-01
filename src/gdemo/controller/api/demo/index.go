@@ -1,7 +1,6 @@
 package demo
 
 import (
-	"gdemo/controller/api"
 	"gdemo/dao"
 	"gdemo/errno"
 	"gdemo/svc"
@@ -21,7 +20,7 @@ var indexQueryConditions map[string]string = map[string]string{
 	"status": dao.SQL_COND_EQUAL,
 }
 
-func (this *DemoController) IndexAction(context *api.ApiContext) {
+func (this *DemoController) IndexAction(context *DemoContext) {
 	ap, exists, e := this.parseIndexActionParams(context)
 	if e != nil {
 		context.ApiData.Err = e
@@ -38,7 +37,7 @@ func (this *DemoController) IndexAction(context *api.ApiContext) {
 		Cnt:     ap.cnt,
 	}
 
-	entities, err := this.demoSvc.SimpleQueryAnd(sqp)
+	entities, err := context.demoSvc.SimpleQueryAnd(sqp)
 	if err != nil {
 		context.ApiData.Err = exception.New(errno.E_SYS_MYSQL_ERROR, err.Error())
 		return
@@ -47,7 +46,7 @@ func (this *DemoController) IndexAction(context *api.ApiContext) {
 	context.ApiData.Data = entities
 }
 
-func (this *DemoController) parseIndexActionParams(context *api.ApiContext) (*indexActionParams, map[string]bool, *exception.Exception) {
+func (this *DemoController) parseIndexActionParams(context *DemoContext) (*indexActionParams, map[string]bool, *exception.Exception) {
 	ap := new(indexActionParams)
 
 	qs := query.NewQuerySet()

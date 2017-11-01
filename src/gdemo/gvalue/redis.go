@@ -2,6 +2,7 @@ package gvalue
 
 import (
 	"andals/gobox/redis"
+	"andals/golog"
 
 	"gdemo/conf"
 )
@@ -14,7 +15,7 @@ func InitRedis() {
 
 func NewRedisClient() (*redis.Client, error) {
 	config := redis.NewConfig(conf.RedisConf.Host, conf.RedisConf.Port, conf.RedisConf.Pass)
-	config.LogLevel = conf.LogConf.Level
+	config.LogLevel = golog.LEVEL_DEBUG
 	config.ReadTimeout = conf.RedisConf.RWTimeout
 	config.WriteTimeout = conf.RedisConf.RWTimeout
 

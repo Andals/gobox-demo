@@ -1,7 +1,6 @@
 package demo
 
 import (
-	"gdemo/controller/api"
 	"gdemo/errno"
 	"gdemo/svc"
 
@@ -9,7 +8,7 @@ import (
 	"andals/gobox/http/query"
 )
 
-func (this *DemoController) EditAction(context *api.ApiContext) {
+func (this *DemoController) EditAction(context *DemoContext) {
 	ap, exists, e := this.parseEditActionParams(context)
 	if e != nil {
 		context.ApiData.Err = e
@@ -20,7 +19,7 @@ func (this *DemoController) EditAction(context *api.ApiContext) {
 		return
 	}
 
-	updated, err := this.demoSvc.UpdateById(ap.Id, ap, exists)
+	updated, err := context.demoSvc.UpdateById(ap.Id, ap, exists)
 	if err != nil {
 		context.ApiData.Err = exception.New(errno.E_API_DEMO_UPDATE_FAILED, err.Error())
 		return
@@ -29,7 +28,7 @@ func (this *DemoController) EditAction(context *api.ApiContext) {
 	context.ApiData.Data = updated
 }
 
-func (this *DemoController) parseEditActionParams(context *api.ApiContext) (*svc.DemoEntity, map[string]bool, *exception.Exception) {
+func (this *DemoController) parseEditActionParams(context *DemoContext) (*svc.DemoEntity, map[string]bool, *exception.Exception) {
 	ap := new(svc.DemoEntity)
 
 	qs := query.NewQuerySet()

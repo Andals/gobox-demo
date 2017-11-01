@@ -26,13 +26,62 @@ type ApiContext struct {
 		Err  *exception.Exception
 	}
 
-	MysqlPool   *mysql.Pool
 	MysqlClient *mysql.Client
 	MysqlLogger golog.ILogger
 
 	RedisPool   *redis.Pool
 	RedisClient *redis.Client
 	RedisLogger golog.ILogger
+}
+
+func (this *ApiContext) BeforeAction() {
+	this.BaseContext.BeforeAction()
+
+	var err error
+	this.MysqlClient, err = gvalue.NewMysqlClient()
+	if err != nil {
+		this.ApiData.Err = exception.New(errno.E_SYS_MYSQL_ERROR, err.Error())
+		system.JumpOutAction(JumpToApiError)
+	}
+	this.MysqlLogger = gvalue.NewAsyncLogger(gvalue.MysqlLogWriter, this.LogFormater)
+	this.MysqlClient.SetLogger(this.MysqlLogger)
+
+	this.RedisPool = gvalue.RedisClientPool
+	this.RedisClient, err = this.RedisPool.Get()
+	if err != nil {
+		this.ApiData.Err = exception.New(errno.E_SYS_REDIS_ERROR, err.Error())
+		system.JumpOutAction(JumpToApiError)
+	}
+	this.RedisLogger = gvalue.NewAsyncLogger(gvalue.RedisLogWriter, this.LogFormater)
+	this.RedisClient.SetLogger(this.RedisLogger)
+}
+
+func (this *ApiContext) AfterAction() {
+	f := this.QueryValues.Get("fmt")
+	if f == "jsonp" {
+		callback := this.QueryValues.Get("_callback")
+		if callback != "" {
+			this.RespBody = misc.ApiJsonp(this.ApiData.V, this.ApiData.Data, this.ApiData.Err, html.EscapeString(callback))
+			return
+		}
+	}
+
+	this.RespBody = misc.ApiJson(this.ApiData.V, this.ApiData.Data, this.ApiData.Err)
+
+	this.BaseContext.AfterAction()
+}
+
+func (this *ApiContext) Destruct() {
+	this.MysqlClient.Free()
+	this.MysqlLogger.Free()
+
+	if !this.RedisClient.Closed() {
+		this.RedisClient.SetLogger(gvalue.NoopLogger)
+		this.RedisPool.Put(this.RedisClient)
+	}
+	this.RedisLogger.Free()
+
+	this.BaseContext.Destruct()
 }
 
 type BaseController struct {
@@ -46,60 +95,7 @@ func (this *BaseController) NewActionContext(req *http.Request, respWriter http.
 	return context
 }
 
-func (this *BaseController) BeforeAction(context gcontroller.ActionContext) {
-	acontext := context.(*ApiContext)
-	this.BaseController.BeforeAction(acontext.BaseContext)
-
-	var err error
-	acontext.MysqlPool = gvalue.MysqlClientPool
-	acontext.MysqlClient, err = acontext.MysqlPool.Get()
-	if err != nil {
-		acontext.ApiData.Err = exception.New(errno.E_SYS_MYSQL_ERROR, err.Error())
-		system.JumpOutAction(this.jumpToError)
-	}
-	acontext.MysqlLogger = gvalue.NewAsyncLogger(gvalue.MysqlLogWriter, acontext.LogFormater)
-	acontext.MysqlClient.SetLogger(acontext.MysqlLogger)
-
-	acontext.RedisPool = gvalue.RedisClientPool
-	acontext.RedisClient, err = acontext.RedisPool.Get()
-	if err != nil {
-		acontext.ApiData.Err = exception.New(errno.E_SYS_REDIS_ERROR, err.Error())
-		system.JumpOutAction(this.jumpToError)
-	}
-	acontext.RedisLogger = gvalue.NewAsyncLogger(gvalue.RedisLogWriter, acontext.LogFormater)
-	acontext.RedisClient.SetLogger(acontext.RedisLogger)
-}
-
-func (this *BaseController) AfterAction(context gcontroller.ActionContext) {
-	acontext := context.(*ApiContext)
-
-	f := acontext.QueryValues.Get("fmt")
-	if f == "jsonp" {
-		callback := acontext.QueryValues.Get("_callback")
-		if callback != "" {
-			acontext.RespBody = misc.ApiJsonp(acontext.ApiData.V, acontext.ApiData.Data, acontext.ApiData.Err, html.EscapeString(callback))
-			return
-		}
-	}
-
-	acontext.RespBody = misc.ApiJson(acontext.ApiData.V, acontext.ApiData.Data, acontext.ApiData.Err)
-
-	this.BaseController.AfterAction(acontext.BaseContext)
-}
-
-func (this *BaseController) Destruct(context gcontroller.ActionContext) {
-	acontext := context.(*ApiContext)
-
-	acontext.MysqlPool.Put(acontext.MysqlClient)
-	acontext.MysqlLogger.Free()
-
-	acontext.RedisPool.Put(acontext.RedisClient)
-	acontext.RedisLogger.Free()
-
-	this.BaseController.Destruct(acontext.BaseContext)
-}
-
-func (this *BaseController) jumpToError(context gcontroller.ActionContext, args ...interface{}) {
+func JumpToApiError(context gcontroller.ActionContext, args ...interface{}) {
 	acontext := context.(*ApiContext)
 
 	acontext.RespBody = misc.ApiJson(acontext.ApiData.V, acontext.ApiData.Data, acontext.ApiData.Err)

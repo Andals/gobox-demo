@@ -98,7 +98,7 @@ func (this *sqlBaseSvc) Insert(tableName string, colNames []string, entities ...
 		baseEntity := rev.FieldByName("SqlBaseEntity").Addr().Interface().(*SqlBaseEntity)
 		err := this.fillBaseEntityForInsert(baseEntity)
 		if err != nil {
-
+			this.mclient.Free()
 			this.elogger.Error([]byte("fill SqlBaseEntity error: " + err.Error()))
 			return nil, err
 		}
@@ -144,6 +144,7 @@ func (this *sqlBaseSvc) GetById(tableName string, id int64, entityPtr interface{
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
+		this.mclient.Free()
 		return false, err
 	}
 
@@ -176,6 +177,7 @@ func (this *sqlBaseSvc) UpdateById(tableName string, id int64, newEntityPtr inte
 
 	find, err := this.GetById(tableName, id, oldEntity)
 	if err != nil {
+		this.mclient.Free()
 		this.elogger.Error([]byte("read mysql error"))
 		return nil, err
 	}
@@ -191,7 +193,7 @@ func (this *sqlBaseSvc) UpdateById(tableName string, id int64, newEntityPtr inte
 	setItems = append(setItems, dao.NewSqlColQueryItem("edit_time", "", time.Now().Format(gmisc.TimeGeneralLayout())))
 	result := this.dao.UpdateById(tableName, id, setItems...)
 	if result.Err != nil {
-		this.elogger.Error([]byte("update mysql error: " + err.Error()))
+		this.elogger.Error([]byte("update mysql error: " + result.Err.Error()))
 		return nil, result.Err
 	}
 	if result.RowsAffected == 0 {
@@ -233,6 +235,7 @@ func (this *sqlBaseSvc) reflectUpdateSetItems(roldv, rnewv reflect.Value, update
 func (this *sqlBaseSvc) ListByIds(tableName string, ids []int64, orderBy string, entityType reflect.Type, listPtr interface{}) error {
 	rows, err := this.dao.SelectByIds(tableName, "*", orderBy, ids...)
 	if err != nil {
+		this.mclient.Free()
 		this.elogger.Error([]byte("list from mysql error:" + err.Error()))
 		return err
 	}
@@ -280,6 +283,7 @@ func (this *sqlBaseSvc) SimpleQueryAnd(tableName string, sqp *SqlQueryParams, en
 
 	rows, err := this.dao.SimpleQueryAnd(tableName, "*", sqp.OrderBy, sqp.Offset, sqp.Cnt, setItems...)
 	if err != nil {
+		this.mclient.Free()
 		this.elogger.Error([]byte("list from mysql error:" + err.Error()))
 		return err
 	}

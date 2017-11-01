@@ -1,7 +1,6 @@
 package demo
 
 import (
-	"gdemo/controller/api"
 	"gdemo/errno"
 	"gdemo/svc"
 
@@ -9,14 +8,14 @@ import (
 	"andals/gobox/http/query"
 )
 
-func (this *DemoController) AddAction(context *api.ApiContext) {
+func (this *DemoController) AddAction(context *DemoContext) {
 	ap, e := this.parseAddActionParams(context)
 	if e != nil {
 		context.ApiData.Err = e
 		return
 	}
 
-	ids, err := this.demoSvc.Insert(ap)
+	ids, err := context.demoSvc.Insert(ap)
 	if err != nil {
 		context.ApiData.Err = exception.New(errno.E_API_DEMO_INSERT_FAILED, err.Error())
 		return
@@ -27,7 +26,7 @@ func (this *DemoController) AddAction(context *api.ApiContext) {
 	}
 }
 
-func (this *DemoController) parseAddActionParams(context *api.ApiContext) (*svc.DemoEntity, *exception.Exception) {
+func (this *DemoController) parseAddActionParams(context *DemoContext) (*svc.DemoEntity, *exception.Exception) {
 	ap := new(svc.DemoEntity)
 
 	qs := query.NewQuerySet()

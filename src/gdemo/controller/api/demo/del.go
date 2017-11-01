@@ -1,7 +1,6 @@
 package demo
 
 import (
-	"gdemo/controller/api"
 	"gdemo/errno"
 
 	"andals/gobox/exception"
@@ -12,14 +11,14 @@ type delActionParams struct {
 	id int64
 }
 
-func (this *DemoController) DelAction(context *api.ApiContext) {
+func (this *DemoController) DelAction(context *DemoContext) {
 	ap, e := this.parseDelActionParams(context)
 	if e != nil {
 		context.ApiData.Err = e
 		return
 	}
 
-	deleted, err := this.demoSvc.DeleteById(ap.id)
+	deleted, err := context.demoSvc.DeleteById(ap.id)
 	if err != nil {
 		context.ApiData.Err = exception.New(errno.E_SYS_MYSQL_ERROR, err.Error())
 		return
@@ -28,7 +27,7 @@ func (this *DemoController) DelAction(context *api.ApiContext) {
 	context.ApiData.Data = deleted
 }
 
-func (this *DemoController) parseDelActionParams(context *api.ApiContext) (*delActionParams, *exception.Exception) {
+func (this *DemoController) parseDelActionParams(context *DemoContext) (*delActionParams, *exception.Exception) {
 	ap := new(delActionParams)
 
 	qs := query.NewQuerySet()

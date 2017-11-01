@@ -1,7 +1,6 @@
 package demo
 
 import (
-	"gdemo/controller/api"
 	"gdemo/errno"
 
 	"andals/gobox/exception"
@@ -12,14 +11,14 @@ type getActionParams struct {
 	id int64
 }
 
-func (this *DemoController) GetAction(context *api.ApiContext) {
+func (this *DemoController) GetAction(context *DemoContext) {
 	ap, e := this.parseGetActionParams(context)
 	if e != nil {
 		context.ApiData.Err = e
 		return
 	}
 
-	entity, err := this.demoSvc.GetById(ap.id)
+	entity, err := context.demoSvc.GetById(ap.id)
 	if err != nil {
 		context.ApiData.Err = exception.New(errno.E_SYS_MYSQL_ERROR, err.Error())
 		return
@@ -28,7 +27,7 @@ func (this *DemoController) GetAction(context *api.ApiContext) {
 	context.ApiData.Data = entity
 }
 
-func (this *DemoController) parseGetActionParams(context *api.ApiContext) (*getActionParams, *exception.Exception) {
+func (this *DemoController) parseGetActionParams(context *DemoContext) (*getActionParams, *exception.Exception) {
 	ap := new(getActionParams)
 
 	qs := query.NewQuerySet()

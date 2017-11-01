@@ -50,6 +50,21 @@ func (this *BaseContext) ResponseBody() []byte {
 	return this.RespBody
 }
 
+func (this *BaseContext) BeforeAction() {
+}
+
+func (this *BaseContext) AfterAction() {
+}
+
+func (this *BaseContext) Destruct() {
+	this.RespBody = nil
+	this.QueryValues = nil
+	this.Rid = nil
+
+	this.ErrorLogger.Free()
+	this.LogFormater = nil
+}
+
 type BaseController struct {
 }
 
@@ -76,23 +91,6 @@ func (this *BaseController) NewActionContext(req *http.Request, respWriter http.
 	context.ErrorLogger = gvalue.NewAsyncLogger(gvalue.ErrorLogWriter, context.LogFormater)
 
 	return context
-}
-
-func (this *BaseController) BeforeAction(context controller.ActionContext) {
-}
-
-func (this *BaseController) AfterAction(context controller.ActionContext) {
-}
-
-func (this *BaseController) Destruct(context controller.ActionContext) {
-	bcontext := context.(*BaseContext)
-
-	bcontext.RespBody = nil
-	bcontext.QueryValues = nil
-	bcontext.Rid = nil
-
-	bcontext.ErrorLogger.Free()
-	bcontext.LogFormater = nil
 }
 
 func (this *BaseController) parseRemoteAddr(req *http.Request) (string, string) {

@@ -1,27 +1,39 @@
 package demo
 
 import (
+	"gdemo/conf"
 	"gdemo/controller/api"
 	"gdemo/svc"
 
 	gcontroller "andals/gobox/http/controller"
-	"gdemo/conf"
+
+	"net/http"
 )
 
-type DemoController struct {
-	api.BaseController
+type DemoContext struct {
+	*api.ApiContext
 
 	demoSvc *svc.DemoSvc
 }
 
-func (this *DemoController) BeforeAction(context gcontroller.ActionContext) {
-	this.BaseController.BeforeAction(context)
+func (this *DemoContext) BeforeAction() {
+	this.ApiContext.BeforeAction()
 
-	acontext := context.(*api.ApiContext)
 	this.demoSvc = svc.NewDemoSvc(
-		acontext.ErrorLogger,
-		acontext.MysqlClient,
+		this.ErrorLogger,
+		this.MysqlClient,
 		conf.BaseConf.PrjName,
-		acontext.RedisClient,
+		this.RedisClient,
 	)
+}
+
+type DemoController struct {
+	api.BaseController
+}
+
+func (this *DemoController) NewActionContext(req *http.Request, respWriter http.ResponseWriter) gcontroller.ActionContext {
+	context := new(DemoContext)
+	context.ApiContext = this.BaseController.NewActionContext(req, respWriter).(*api.ApiContext)
+
+	return context
 }
