@@ -1,9 +1,9 @@
 package svc
 
 import (
-	gmisc "andals/gobox/misc"
-	"andals/gobox/mysql"
-	"andals/golog"
+	gmisc "github.com/andals/gobox/misc"
+	"github.com/andals/gobox/mysql"
+	"github.com/andals/golog"
 
 	"gdemo/dao"
 	"gdemo/idgen"

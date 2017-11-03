@@ -1,8 +1,8 @@
 package idgen
 
 import (
-	"andals/gobox/mysql"
-	"andals/golog"
+	"github.com/andals/gobox/mysql"
+	"github.com/andals/golog"
 
 	"testing"
 )

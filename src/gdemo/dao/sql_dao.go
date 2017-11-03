@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"andals/gobox/mysql"
+	"github.com/andals/gobox/mysql"
 
 	"database/sql"
 )

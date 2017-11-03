@@ -1,8 +1,8 @@
 package conf
 
 import (
-	"andals/gobox/exception"
-	gmisc "andals/gobox/misc"
+	"github.com/andals/gobox/exception"
+	gmisc "github.com/andals/gobox/misc"
 
 	"gdemo/errno"
 )

@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"andals/gobox/redis"
+	"github.com/andals/gobox/redis"
 
 	"encoding/json"
 	"reflect"

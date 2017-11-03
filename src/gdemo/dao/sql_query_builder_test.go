@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"andals/gobox/misc"
+	"github.com/andals/gobox/misc"
 
 	"fmt"
 	"testing"

@@ -4,8 +4,8 @@ import (
 	"gdemo/conf"
 	"gdemo/errno"
 
-	"andals/gobox/exception"
-	"andals/golog"
+	"github.com/andals/gobox/exception"
+	"github.com/andals/golog"
 )
 
 var ErrorLogWriter golog.IWriter

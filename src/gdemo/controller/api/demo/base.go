@@ -5,7 +5,7 @@ import (
 	"gdemo/controller/api"
 	"gdemo/svc"
 
-	gcontroller "andals/gobox/http/controller"
+	gcontroller "github.com/andals/gobox/http/controller"
 
 	"net/http"
 )

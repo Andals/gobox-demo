@@ -3,7 +3,7 @@ package dao
 import (
 	"gdemo/misc"
 
-	gmisc "andals/gobox/misc"
+	gmisc "github.com/andals/gobox/misc"
 
 	"testing"
 	"time"

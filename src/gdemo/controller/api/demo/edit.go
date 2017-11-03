@@ -4,8 +4,8 @@ import (
 	"gdemo/errno"
 	"gdemo/svc"
 
-	"andals/gobox/exception"
-	"andals/gobox/http/query"
+	"github.com/andals/gobox/exception"
+	"github.com/andals/gobox/http/query"
 )
 
 func (this *DemoController) EditAction(context *DemoContext) {

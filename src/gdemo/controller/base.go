@@ -3,10 +3,10 @@ package controller
 import (
 	"gdemo/gvalue"
 
-	"andals/gobox/encoding"
-	"andals/gobox/http/controller"
-	gmisc "andals/gobox/misc"
-	"andals/golog"
+	"github.com/andals/gobox/encoding"
+	"github.com/andals/gobox/http/controller"
+	gmisc "github.com/andals/gobox/misc"
+	"github.com/andals/golog"
 
 	"net/http"
 	"net/url"

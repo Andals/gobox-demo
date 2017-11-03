@@ -1,10 +1,10 @@
 package misc
 
 import (
-	"andals/gobox/color"
-	"andals/gobox/mysql"
-	"andals/gobox/redis"
-	"andals/golog"
+	"github.com/andals/gobox/color"
+	"github.com/andals/gobox/mysql"
+	"github.com/andals/gobox/redis"
+	"github.com/andals/golog"
 
 	"fmt"
 	"reflect"

@@ -1,8 +1,8 @@
 package gvalue
 
 import (
-	"andals/gobox/redis"
-	"andals/golog"
+	"github.com/andals/gobox/redis"
+	"github.com/andals/golog"
 
 	"gdemo/conf"
 )

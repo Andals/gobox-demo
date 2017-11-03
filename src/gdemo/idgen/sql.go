@@ -1,6 +1,6 @@
 package idgen
 
-import "andals/gobox/mysql"
+import "github.com/andals/gobox/mysql"
 
 type SqlIdGenter struct {
 	client *mysql.Client

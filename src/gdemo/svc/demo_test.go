@@ -3,7 +3,7 @@ package svc
 import (
 	"gdemo/misc"
 
-	gmisc "andals/gobox/misc"
+	gmisc "github.com/andals/gobox/misc"
 
 	"gdemo/dao"
 	"testing"

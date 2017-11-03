@@ -3,8 +3,8 @@ package demo
 import (
 	"gdemo/errno"
 
-	"andals/gobox/exception"
-	"andals/gobox/http/query"
+	"github.com/andals/gobox/exception"
+	"github.com/andals/gobox/http/query"
 )
 
 type getActionParams struct {

@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"andals/golog"
+	"github.com/andals/golog"
 )
 
 type baseSvc struct {

@@ -1,17 +1,17 @@
 package api
 
 import (
-	"andals/gobox/http/system"
-	"andals/gobox/mysql"
 	"gdemo/controller"
 	"gdemo/errno"
 	"gdemo/gvalue"
 	"gdemo/misc"
+	"github.com/andals/gobox/http/system"
+	"github.com/andals/gobox/mysql"
 
-	"andals/gobox/exception"
-	gcontroller "andals/gobox/http/controller"
-	"andals/gobox/redis"
-	"andals/golog"
+	"github.com/andals/gobox/exception"
+	gcontroller "github.com/andals/gobox/http/controller"
+	"github.com/andals/gobox/redis"
+	"github.com/andals/golog"
 
 	"html"
 	"net/http"

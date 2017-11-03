@@ -1,9 +1,9 @@
 package svc
 
 import (
-	"andals/gobox/mysql"
-	"andals/gobox/redis"
-	"andals/golog"
+	"github.com/andals/gobox/mysql"
+	"github.com/andals/gobox/redis"
+	"github.com/andals/golog"
 
 	"reflect"
 )
