@@ -75,7 +75,7 @@ func (this *ApiContext) Destruct() {
 	this.MysqlClient.Free()
 	this.MysqlLogger.Free()
 
-	if !this.RedisClient.Closed() {
+	if this.RedisClient.Connected() {
 		this.RedisClient.SetLogger(gvalue.NoopLogger)
 		this.RedisPool.Put(this.RedisClient)
 	}

@@ -13,7 +13,7 @@ const (
 )
 
 var demoEntityType reflect.Type = reflect.TypeOf(DemoEntity{})
-var demoColNames []string = reflectColNames(demoEntityType)
+var demoColNames []string = ReflectColNames(demoEntityType)
 
 type DemoEntity struct {
 	SqlBaseEntity
@@ -23,18 +23,18 @@ type DemoEntity struct {
 }
 
 type DemoSvc struct {
-	*sqlRedisBindSvc
+	*SqlRedisBindSvc
 }
 
 func NewDemoSvc(elogger golog.ILogger, mclient *mysql.Client, redisKeyPrefix string, rclient *redis.Client) *DemoSvc {
-	bs := newBaseSvc(elogger)
-	sbs := newSqlBaseSvc(bs, mclient, "demo")
+	bs := NewBaseSvc(elogger)
+	sbs := NewSqlBaseSvc(bs, mclient, "demo")
 
 	return &DemoSvc{
-		&sqlRedisBindSvc{
-			baseSvc:      bs,
-			sqlBaseSvc:   sbs,
-			redisBaseSvc: newRedisBaseSvc(bs, rclient),
+		&SqlRedisBindSvc{
+			BaseSvc:      bs,
+			SqlBaseSvc:   sbs,
+			RedisBaseSvc: NewRedisBaseSvc(bs, rclient),
 
 			redisKeyPrefix: redisKeyPrefix,
 		},
@@ -47,13 +47,13 @@ func (this *DemoSvc) Insert(entities ...*DemoEntity) ([]int64, error) {
 		is[i] = entity
 	}
 
-	return this.sqlRedisBindSvc.Insert(this.entityName, demoColNames, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS, is...)
+	return this.SqlRedisBindSvc.Insert(this.entityName, demoColNames, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS, is...)
 }
 
 func (this *DemoSvc) GetById(id int64) (*DemoEntity, error) {
 	entity := new(DemoEntity)
 
-	find, err := this.sqlRedisBindSvc.GetById(this.entityName, id, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS, entity)
+	find, err := this.SqlRedisBindSvc.GetById(this.entityName, id, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS, entity)
 	if err != nil {
 		return nil, err
 	}
@@ -65,17 +65,17 @@ func (this *DemoSvc) GetById(id int64) (*DemoEntity, error) {
 }
 
 func (this *DemoSvc) DeleteById(id int64) (bool, error) {
-	return this.sqlRedisBindSvc.DeleteById(this.entityName, id)
+	return this.SqlRedisBindSvc.DeleteById(this.entityName, id)
 }
 
 func (this *DemoSvc) UpdateById(id int64, newEntity *DemoEntity, updateFields map[string]bool) (bool, error) {
-	return this.sqlRedisBindSvc.UpdateById(this.entityName, id, newEntity, updateFields, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS)
+	return this.SqlRedisBindSvc.UpdateById(this.entityName, id, newEntity, updateFields, DEF_DEMO_ENTITY_CACHE_EXPIRE_SECONDS)
 }
 
 func (this *DemoSvc) ListByIds(ids ...int64) ([]*DemoEntity, error) {
 	var entities []*DemoEntity
 
-	err := this.sqlBaseSvc.ListByIds(this.entityName, ids, "id desc", demoEntityType, &entities)
+	err := this.SqlBaseSvc.ListByIds(this.entityName, ids, "id desc", demoEntityType, &entities)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (this *DemoSvc) ListByIds(ids ...int64) ([]*DemoEntity, error) {
 func (this *DemoSvc) SimpleQueryAnd(sqp *SqlQueryParams) ([]*DemoEntity, error) {
 	var entities []*DemoEntity
 
-	err := this.sqlBaseSvc.SimpleQueryAnd(this.entityName, sqp, demoEntityType, &entities)
+	err := this.SqlBaseSvc.SimpleQueryAnd(this.entityName, sqp, demoEntityType, &entities)
 	if err != nil {
 		return nil, err
 	}

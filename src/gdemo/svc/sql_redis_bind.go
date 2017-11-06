@@ -5,24 +5,24 @@ import (
 	"strconv"
 )
 
-type sqlRedisBindSvc struct {
-	*baseSvc
-	*sqlBaseSvc
-	*redisBaseSvc
+type SqlRedisBindSvc struct {
+	*BaseSvc
+	*SqlBaseSvc
+	*RedisBaseSvc
 
 	redisKeyPrefix string
 }
 
-func NewSqlRedisBindSvc(bs *baseSvc, ss *sqlBaseSvc, rs *redisBaseSvc, redisKeyPrefix string) *sqlRedisBindSvc {
-	return &sqlRedisBindSvc{bs, ss, rs, redisKeyPrefix}
+func NewSqlRedisBindSvc(bs *BaseSvc, ss *SqlBaseSvc, rs *RedisBaseSvc, redisKeyPrefix string) *SqlRedisBindSvc {
+	return &SqlRedisBindSvc{bs, ss, rs, redisKeyPrefix}
 }
 
-func (this *sqlRedisBindSvc) redisKeyForEntity(id int64) string {
+func (this *SqlRedisBindSvc) redisKeyForEntity(id int64) string {
 	return this.redisKeyPrefix + "_entity_" + this.entityName + "_id_" + strconv.FormatInt(id, 10)
 }
 
-func (this *sqlRedisBindSvc) Insert(tableName string, colNames []string, expireSeconds int64, entities ...interface{}) ([]int64, error) {
-	ids, err := this.sqlBaseSvc.Insert(tableName, colNames, entities...)
+func (this *SqlRedisBindSvc) Insert(tableName string, colNames []string, expireSeconds int64, entities ...interface{}) ([]int64, error) {
+	ids, err := this.SqlBaseSvc.Insert(tableName, colNames, entities...)
 	if err != nil {
 		return nil, err
 	}
@@ -34,18 +34,18 @@ func (this *sqlRedisBindSvc) Insert(tableName string, colNames []string, expireS
 	return ids, nil
 }
 
-func (this *sqlRedisBindSvc) GetById(tableName string, id, expireSeconds int64, entityPtr interface{}) (bool, error) {
+func (this *SqlRedisBindSvc) GetById(tableName string, id, expireSeconds int64, entityPtr interface{}) (bool, error) {
 	rk := this.redisKeyForEntity(id)
 
 	find, err := this.getHashEntityFromRedis(rk, entityPtr)
 	if err != nil {
-		return this.sqlBaseSvc.GetById(tableName, id, entityPtr)
+		return this.SqlBaseSvc.GetById(tableName, id, entityPtr)
 	}
 	if find {
 		return true, nil
 	}
 
-	find, err = this.sqlBaseSvc.GetById(tableName, id, entityPtr)
+	find, err = this.SqlBaseSvc.GetById(tableName, id, entityPtr)
 	if err != nil {
 		this.elogger.Error([]byte("getById from mysql error"))
 		return false, err
@@ -59,7 +59,7 @@ func (this *sqlRedisBindSvc) GetById(tableName string, id, expireSeconds int64, 
 	return true, nil
 }
 
-func (this *sqlRedisBindSvc) DeleteById(tableName string, id int64) (bool, error) {
+func (this *SqlRedisBindSvc) DeleteById(tableName string, id int64) (bool, error) {
 	result := this.dao.DeleteById(tableName, id)
 	if result.Err != nil {
 		this.elogger.Error([]byte("delete from mysql error: " + result.Err.Error()))
@@ -79,8 +79,8 @@ func (this *sqlRedisBindSvc) DeleteById(tableName string, id int64) (bool, error
 	return true, nil
 }
 
-func (this *sqlRedisBindSvc) UpdateById(tableName string, id int64, newEntityPtr interface{}, updateFields map[string]bool, expireSeconds int64) (bool, error) {
-	setItems, err := this.sqlBaseSvc.UpdateById(tableName, id, newEntityPtr, updateFields)
+func (this *SqlRedisBindSvc) UpdateById(tableName string, id int64, newEntityPtr interface{}, updateFields map[string]bool, expireSeconds int64) (bool, error) {
+	setItems, err := this.SqlBaseSvc.UpdateById(tableName, id, newEntityPtr, updateFields)
 
 	if err != nil {
 		return false, err
@@ -94,7 +94,7 @@ func (this *sqlRedisBindSvc) UpdateById(tableName string, id int64, newEntityPtr
 	return true, nil
 }
 
-func (this *sqlRedisBindSvc) updateSqlHashEntity(key string, setItems []*dao.SqlColQueryItem, expireSeconds int64) error {
+func (this *SqlRedisBindSvc) updateSqlHashEntity(key string, setItems []*dao.SqlColQueryItem, expireSeconds int64) error {
 	cnt := len(setItems)*2 + 1
 	args := make([]interface{}, cnt)
 	args[0] = key

@@ -40,7 +40,5 @@ func RedisTestClient() *redis.Client {
 	w, _ := golog.NewFileWriter("/tmp/test_redis.log")
 	logger, _ := golog.NewSimpleLogger(w, golog.LEVEL_INFO, golog.NewSimpleFormater())
 
-	client, _ := redis.NewClient(config, logger)
-
-	return client
+	return redis.NewClient(config, logger)
 }

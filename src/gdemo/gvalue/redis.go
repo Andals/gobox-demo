@@ -19,5 +19,5 @@ func NewRedisClient() (*redis.Client, error) {
 	config.ReadTimeout = conf.RedisConf.RWTimeout
 	config.WriteTimeout = conf.RedisConf.RWTimeout
 
-	return redis.NewClient(config, nil)
+	return redis.NewClient(config, nil), nil
 }

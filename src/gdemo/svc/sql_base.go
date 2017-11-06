@@ -23,8 +23,8 @@ type SqlBaseEntity struct {
 	EditTime string `mysql:"edit_time" json:"edit_time" redis:"edit_time"`
 }
 
-type sqlBaseSvc struct {
-	*baseSvc
+type SqlBaseSvc struct {
+	*BaseSvc
 
 	mclient *mysql.Client
 	mlogger golog.ILogger
@@ -45,13 +45,13 @@ type SqlQueryParams struct {
 	Cnt     int64
 }
 
-func reflectColNames(ret reflect.Type) []string {
+func ReflectColNames(ret reflect.Type) []string {
 	var cns []string
 
 	for i := 0; i < ret.NumField(); i++ {
 		retf := ret.Field(i)
 		if retf.Type.Kind() == reflect.Struct {
-			cns = reflectColNames(retf.Type)
+			cns = ReflectColNames(retf.Type)
 			continue
 		}
 
@@ -63,9 +63,9 @@ func reflectColNames(ret reflect.Type) []string {
 	return cns
 }
 
-func newSqlBaseSvc(bs *baseSvc, mclient *mysql.Client, entityName string) *sqlBaseSvc {
-	return &sqlBaseSvc{
-		baseSvc: bs,
+func NewSqlBaseSvc(bs *BaseSvc, mclient *mysql.Client, entityName string) *SqlBaseSvc {
+	return &SqlBaseSvc{
+		BaseSvc: bs,
 
 		mclient:    mclient,
 		entityName: entityName,
@@ -75,7 +75,7 @@ func newSqlBaseSvc(bs *baseSvc, mclient *mysql.Client, entityName string) *sqlBa
 	}
 }
 
-func (this *sqlBaseSvc) fillBaseEntityForInsert(entity *SqlBaseEntity) error {
+func (this *SqlBaseSvc) fillBaseEntityForInsert(entity *SqlBaseEntity) error {
 	id, err := this.idGenter.GenId(this.entityName)
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func (this *sqlBaseSvc) fillBaseEntityForInsert(entity *SqlBaseEntity) error {
 	return nil
 }
 
-func (this *sqlBaseSvc) Insert(tableName string, colNames []string, entities ...interface{}) ([]int64, error) {
+func (this *SqlBaseSvc) Insert(tableName string, colNames []string, entities ...interface{}) ([]int64, error) {
 	cnt := len(entities)
 	colsValues := make([][]interface{}, cnt)
 	ids := make([]int64, cnt)
@@ -116,7 +116,7 @@ func (this *sqlBaseSvc) Insert(tableName string, colNames []string, entities ...
 	return ids, nil
 }
 
-func (this *sqlBaseSvc) reflectInsertColValues(rev reflect.Value) []interface{} {
+func (this *SqlBaseSvc) reflectInsertColValues(rev reflect.Value) []interface{} {
 	var colValues []interface{}
 
 	ret := rev.Type()
@@ -136,7 +136,7 @@ func (this *sqlBaseSvc) reflectInsertColValues(rev reflect.Value) []interface{} 
 	return colValues
 }
 
-func (this *sqlBaseSvc) GetById(tableName string, id int64, entityPtr interface{}) (bool, error) {
+func (this *SqlBaseSvc) GetById(tableName string, id int64, entityPtr interface{}) (bool, error) {
 	dests := this.reflectEntityScanDests(reflect.ValueOf(entityPtr).Elem())
 
 	err := this.dao.SelectById(tableName, "*", id).Scan(dests...)
@@ -151,7 +151,7 @@ func (this *sqlBaseSvc) GetById(tableName string, id int64, entityPtr interface{
 	return true, nil
 }
 
-func (this *sqlBaseSvc) reflectEntityScanDests(rev reflect.Value) []interface{} {
+func (this *SqlBaseSvc) reflectEntityScanDests(rev reflect.Value) []interface{} {
 	var dests []interface{}
 
 	ret := rev.Type()
@@ -171,7 +171,7 @@ func (this *sqlBaseSvc) reflectEntityScanDests(rev reflect.Value) []interface{} 
 	return dests
 }
 
-func (this *sqlBaseSvc) UpdateById(tableName string, id int64, newEntityPtr interface{}, updateFields map[string]bool) ([]*dao.SqlColQueryItem, error) {
+func (this *SqlBaseSvc) UpdateById(tableName string, id int64, newEntityPtr interface{}, updateFields map[string]bool) ([]*dao.SqlColQueryItem, error) {
 	rnewv := reflect.ValueOf(newEntityPtr).Elem()
 	oldEntity := reflect.New(rnewv.Type()).Interface()
 
@@ -203,7 +203,7 @@ func (this *sqlBaseSvc) UpdateById(tableName string, id int64, newEntityPtr inte
 	return setItems, nil
 }
 
-func (this *sqlBaseSvc) reflectUpdateSetItems(roldv, rnewv reflect.Value, updateFields map[string]bool) []*dao.SqlColQueryItem {
+func (this *SqlBaseSvc) reflectUpdateSetItems(roldv, rnewv reflect.Value, updateFields map[string]bool) []*dao.SqlColQueryItem {
 	var setItems []*dao.SqlColQueryItem
 
 	rnewt := rnewv.Type()
@@ -232,7 +232,7 @@ func (this *sqlBaseSvc) reflectUpdateSetItems(roldv, rnewv reflect.Value, update
 	return setItems
 }
 
-func (this *sqlBaseSvc) ListByIds(tableName string, ids []int64, orderBy string, entityType reflect.Type, listPtr interface{}) error {
+func (this *SqlBaseSvc) ListByIds(tableName string, ids []int64, orderBy string, entityType reflect.Type, listPtr interface{}) error {
 	rows, err := this.dao.SelectByIds(tableName, "*", orderBy, ids...)
 	if err != nil {
 		this.mclient.Free()
@@ -249,7 +249,7 @@ func (this *sqlBaseSvc) ListByIds(tableName string, ids []int64, orderBy string,
 	return nil
 }
 
-func (this *sqlBaseSvc) reflectQueryRowsToEntityList(rows *sql.Rows, ret reflect.Type, listPtr interface{}) error {
+func (this *SqlBaseSvc) reflectQueryRowsToEntityList(rows *sql.Rows, ret reflect.Type, listPtr interface{}) error {
 	if rows.Next() == false {
 		return nil
 	}
@@ -278,7 +278,7 @@ func (this *sqlBaseSvc) reflectQueryRowsToEntityList(rows *sql.Rows, ret reflect
 	return nil
 }
 
-func (this *sqlBaseSvc) SimpleQueryAnd(tableName string, sqp *SqlQueryParams, entityType reflect.Type, listPtr interface{}) error {
+func (this *SqlBaseSvc) SimpleQueryAnd(tableName string, sqp *SqlQueryParams, entityType reflect.Type, listPtr interface{}) error {
 	setItems := this.reflectQuerySetItems(reflect.ValueOf(sqp.ParamsStructPtr).Elem(), sqp.Exists, sqp.Conditions)
 
 	rows, err := this.dao.SimpleQueryAnd(tableName, "*", sqp.OrderBy, sqp.Offset, sqp.Cnt, setItems...)
@@ -297,7 +297,7 @@ func (this *sqlBaseSvc) SimpleQueryAnd(tableName string, sqp *SqlQueryParams, en
 	return nil
 }
 
-func (this *sqlBaseSvc) reflectQuerySetItems(rev reflect.Value, exists map[string]bool, conditions map[string]string) []*dao.SqlColQueryItem {
+func (this *SqlBaseSvc) reflectQuerySetItems(rev reflect.Value, exists map[string]bool, conditions map[string]string) []*dao.SqlColQueryItem {
 	var setItems []*dao.SqlColQueryItem
 	ret := rev.Type()
 

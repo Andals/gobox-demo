@@ -4,16 +4,16 @@ import (
 	"github.com/andals/golog"
 )
 
-type baseSvc struct {
+type BaseSvc struct {
 	elogger golog.ILogger
 }
 
-func newBaseSvc(elogger golog.ILogger) *baseSvc {
+func NewBaseSvc(elogger golog.ILogger) *BaseSvc {
 	if elogger == nil {
 		elogger = new(golog.NoopLogger)
 	}
 
-	return &baseSvc{
+	return &BaseSvc{
 		elogger: elogger,
 	}
 }
