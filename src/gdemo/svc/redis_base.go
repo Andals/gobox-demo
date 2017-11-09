@@ -4,6 +4,7 @@ import (
 	"github.com/andals/gobox/redis"
 
 	"encoding/json"
+	"errors"
 	"reflect"
 )
 
@@ -32,7 +33,7 @@ func (this *RedisBaseSvc) saveJsonDataToRedis(key string, v interface{}, expireS
 		return err
 	}
 
-	_, err = this.rclient.Do("set", key, string(jsonBytes), "ex", expireSeconds)
+	err = this.rclient.Do("set", key, string(jsonBytes), "ex", expireSeconds).Err
 	if err != nil {
 		this.rclient.Free()
 		this.elogger.Warning([]byte("set " + key + " to redis error: " + err.Error()))
@@ -43,11 +44,11 @@ func (this *RedisBaseSvc) saveJsonDataToRedis(key string, v interface{}, expireS
 }
 
 func (this *RedisBaseSvc) getJsonDataFromRedis(key string, v interface{}) (bool, error) {
-	reply, err := this.rclient.Do("get", key)
-	if err != nil {
+	reply := this.rclient.Do("get", key)
+	if reply.Err != nil {
 		this.rclient.Free()
-		this.elogger.Warning([]byte("get " + key + " from redis error: " + err.Error()))
-		return false, err
+		this.elogger.Warning([]byte("get " + key + " from redis error: " + reply.Err.Error()))
+		return false, reply.Err
 	}
 
 	if reply == nil {
@@ -81,29 +82,33 @@ func (this *RedisBaseSvc) saveHashEntityToRedis(key string, entityPtr interface{
 	if expireSeconds > 0 {
 		this.rclient.Send("expire", key, expireSeconds)
 	}
-	_, err := this.rclient.ExecPipelining()
-	if err != nil {
+	replies, errIndexes := this.rclient.ExecPipelining()
+	if len(errIndexes) != 0 {
 		this.rclient.Free()
-		this.elogger.Warning([]byte("hmset " + key + " to redis error: " + err.Error()))
-		return err
+		msg := "hmset " + key + " to redis error:"
+		for _, i := range errIndexes {
+			msg += " " + replies[i].Err.Error()
+		}
+		this.elogger.Warning([]byte(msg))
+		return errors.New(msg)
 	}
 
 	return nil
 }
 
 func (this *RedisBaseSvc) getHashEntityFromRedis(key string, entityPtr interface{}) (bool, error) {
-	reply, err := this.rclient.Do("hgetall", key)
-	if err != nil {
+	reply := this.rclient.Do("hgetall", key)
+	if reply.Err != nil {
 		this.rclient.Free()
-		this.elogger.Warning([]byte("hgetall " + key + " from redis error: " + err.Error()))
-		return false, err
+		this.elogger.Warning([]byte("hgetall " + key + " from redis error: " + reply.Err.Error()))
+		return false, reply.Err
 	}
 
 	if reply.ArrReplyIsNil() {
 		return false, nil
 	}
 
-	err = reply.Struct(entityPtr)
+	err := reply.Struct(entityPtr)
 	if err != nil {
 		this.elogger.Warning([]byte("reply to struct " + key + " from redis error: " + err.Error()))
 		return false, err

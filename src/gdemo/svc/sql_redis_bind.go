@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"errors"
 	"gdemo/dao"
 	"strconv"
 )
@@ -71,7 +72,7 @@ func (this *SqlRedisBindSvc) DeleteById(tableName string, id int64) (bool, error
 	}
 
 	rk := this.redisKeyForEntity(id)
-	_, err := this.rclient.Do("del", rk)
+	err := this.rclient.Do("del", rk).Err
 	if err != nil {
 		this.elogger.Warning([]byte("del key " + rk + " from redis failed: " + err.Error()))
 	}
@@ -110,10 +111,16 @@ func (this *SqlRedisBindSvc) updateSqlHashEntity(key string, setItems []*dao.Sql
 	if expireSeconds > 0 {
 		this.rclient.Send("expire", expireSeconds)
 	}
-	_, err := this.rclient.ExecPipelining()
-	if err != nil {
-		this.elogger.Warning([]byte("hmset key " + key + " to redis failed: " + err.Error()))
+	replies, errIndexes := this.rclient.ExecPipelining()
+	if len(errIndexes) != 0 {
+		this.rclient.Free()
+		msg := "hmset key " + key + " to redis error:"
+		for _, i := range errIndexes {
+			msg += " " + replies[i].Err.Error()
+		}
+		this.elogger.Warning([]byte(msg))
+		return errors.New(msg)
 	}
 
-	return err
+	return nil
 }
