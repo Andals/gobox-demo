@@ -1,7 +1,0 @@
-{
-    "name": "gobox-demo",
-    "dependencies": {
-        "github.com/andals/gobox": "git+https://github.com/Andals/gobox.git",
-        "github.com/andals/golog": "git+https://github.com/Andals/golog.git"
-    }
-}
