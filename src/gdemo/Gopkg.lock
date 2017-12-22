@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/andals/gobox"
   packages = ["color","encoding","exception","http/controller","http/gracehttp","http/query","http/router","http/system","misc","mysql","pidfile","pool","redis"]
-  revision = "9322e69a7e42c005c631c5caaf357115e5539084"
+  revision = "c768ffcd97ade1cbbc76ae03a7c09c91131b1363"
 
 [[projects]]
   branch = "master"
