@@ -26,8 +26,9 @@
         "pass": "",
         "port": "",
         "rw_timeout_seconds": 3,
-        "pool_client_timeout_seconds": 1800,
-        "pool_size": 1024
+        "pool_size": 256,
+        "pool_keepalive_interval_seconds": 10,
+        "pool_client_max_idle_seconds": 30
     },
 
     "mysql": {
@@ -37,7 +38,7 @@
         "port": "",
         "name": "gobox-demo",
         "rw_timeout_seconds": 3,
-        "pool_client_timeout_seconds": 1800,
-        "pool_size": 256
+        "pool_size": 256,
+        "pool_client_max_idle_seconds": 10
     }
 }

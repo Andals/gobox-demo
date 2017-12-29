@@ -10,7 +10,12 @@ import (
 var RedisClientPool *redis.Pool
 
 func InitRedis() {
-	RedisClientPool = redis.NewPool(conf.RedisConf.PoolClientTimeout, conf.RedisConf.PoolSize, NewRedisClient)
+	config := &redis.PConfig{NewClientFunc: NewRedisClient}
+	config.Size = conf.RedisConf.PoolSize
+	config.MaxIdleTime = conf.RedisConf.PoolClientMaxIdleTime
+	config.KeepAliveInterval = conf.RedisConf.PoolKeepAliveInterval
+
+	RedisClientPool = redis.NewPool(config)
 }
 
 func NewRedisClient() (*redis.Client, error) {

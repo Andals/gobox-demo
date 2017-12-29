@@ -25,12 +25,13 @@ type httpConfJson struct {
 }
 
 type redisConfJson struct {
-	Host                     string `json:"host"`
-	Pass                     string `json:"pass"`
-	Port                     string `json:"port"`
-	RWTimeoutSeconds         int    `json:"rw_timeout_seconds"`
-	PoolClientTimeoutSeconds int    `json:"pool_client_timeout_seconds"`
-	PoolSize                 int    `json:"pool_size"`
+	Host                         string `json:"host"`
+	Pass                         string `json:"pass"`
+	Port                         string `json:"port"`
+	RWTimeoutSeconds             int    `json:"rw_timeout_seconds"`
+	PoolSize                     int    `json:"pool_size"`
+	PoolKeepAliveIntervalSeconds int    `json:"pool_keepalive_interval_seconds"`
+	PoolClientMaxIdleSeconds     int    `json:"pool_client_max_idle_seconds"`
 }
 
 type mysqlConfJson struct {
@@ -40,8 +41,8 @@ type mysqlConfJson struct {
 	Port                     string `json:"port"`
 	Name                     string `json:"name"`
 	RWTimeoutSeconds         int    `json:"rw_timeout_seconds"`
-	PoolClientTimeoutSeconds int    `json:"pool_client_timeout_seconds"`
 	PoolSize                 int    `json:"pool_size"`
+	PoolClientMaxIdleSeconds int    `json:"pool_client_max_idle_seconds"`
 }
 
 type serverConfJson struct {

@@ -5,7 +5,7 @@
   branch = "master"
   name = "github.com/andals/gobox"
   packages = ["color","encoding","exception","http/controller","http/gracehttp","http/query","http/router","http/system","misc","mysql","pidfile","pool","redis"]
-  revision = "c768ffcd97ade1cbbc76ae03a7c09c91131b1363"
+  revision = "4d2b5d3240b5ab68e6c4b2941835d9e5d62362bf"
 
 [[projects]]
   branch = "master"
@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/garyburd/redigo"
   packages = ["internal","redis"]
-  revision = "47dc60e71eed504e3ef8e77ee3c6fe720f3be57f"
-  version = "v1.3.0"
+  revision = "d1ed5c67e5794de818ea85e6b522fda02623a484"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/go-sql-driver/mysql"

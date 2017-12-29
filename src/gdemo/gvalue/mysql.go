@@ -10,7 +10,11 @@ import (
 var MysqlClientPool *mysql.Pool
 
 func InitMysql() {
-	MysqlClientPool = mysql.NewPool(conf.MysqlConf.PoolClientTimeout, conf.MysqlConf.PoolSize, NewMysqlClient)
+	config := &mysql.PConfig{NewClientFunc: NewMysqlClient}
+	config.Size = conf.MysqlConf.PoolSize
+	config.MaxIdleTime = conf.MysqlConf.PoolClientMaxIdleTime
+
+	MysqlClientPool = mysql.NewPool(config)
 }
 
 func NewMysqlClient() (*mysql.Client, error) {
